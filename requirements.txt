@@ -6,3 +6,4 @@ streamlit
 prometheus_client
 pillow
 psutil
+pandas

@@ -1,0 +1,7 @@
+[server]
+port = 8501
+maxUploadSize = 200
+headless = true
+
+[browser]
+gatherUsageStats = false
