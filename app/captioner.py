@@ -1,5 +1,5 @@
 # app/captioner.py - BLIP model loading and single-image captioning on CPU.
-# AI-assisted (Claude); logic reviewed and understood by me.
+
 import io
 import time
 
@@ -8,8 +8,7 @@ from PIL import Image, ImageOps
 from transformers import BlipForConditionalGeneration, BlipProcessor
 
 MODEL_NAME = "Salesforce/blip-image-captioning-base"
-MAX_SIDE = 768  # downscale big images: same caption quality, far less CPU
-
+MAX_SIDE = 768  
 
 def load_model():
     t0 = time.perf_counter()
@@ -18,6 +17,10 @@ def load_model():
     model.eval()
     load_s = time.perf_counter() - t0
     param_bytes = sum(p.numel() * p.element_size() for p in model.parameters())
+
+    with torch.inference_mode():
+        dummy = processor(images=Image.new("RGB", (384, 384)), return_tensors="pt")
+        model.generate(**dummy, max_new_tokens=5)
     return processor, model, load_s, param_bytes
 
 

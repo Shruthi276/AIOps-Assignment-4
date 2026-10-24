@@ -1,5 +1,5 @@
-# app/app_metrics.py - all Prometheus metrics for the captioning app.
-# AI-assisted (Claude); logic reviewed and understood by me.
+# app/app_metrics.py - all Prometheus metrics for the captioning app
+
 import os
 import threading
 import time
@@ -9,10 +9,9 @@ from prometheus_client import Counter, Gauge, Histogram, Info, Summary, start_ht
 
 METRICS_PORT = int(os.getenv("METRICS_PORT", "8000"))
 
-# ---------------- Info ----------------
 APP_INFO = Info("caption_app", "Static information about the captioning app")
 
-# ---------------- Counters (only go up) ----------------
+# Counters (monotonic, only go up)
 REQUESTS = Counter(
     "caption_requests_total",
     "Caption requests (one per Single upload or per Bulk ZIP), with client metadata",
@@ -30,7 +29,7 @@ BULK_FILES_SKIPPED = Counter(
 )
 SESSIONS = Counter("caption_sessions_started_total", "New browser sessions", ["browser"])
 
-# ---------------- Gauges (go up and down) ----------------
+# Gauges (go up and down) 
 ACTIVE_REQUESTS = Gauge("caption_active_requests", "Requests being processed now", ["mode"])
 BULK_QUEUE = Gauge("caption_bulk_queue_remaining", "Images left in the current bulk job")
 LAST_BATCH_SIZE = Gauge("caption_last_batch_size", "Images in the most recent bulk job")
@@ -44,7 +43,7 @@ LAST_SUCCESS_TS = Gauge(
     "caption_last_success_timestamp_seconds", "Unix time of last successful caption"
 )
 
-# ---------------- Histograms (distributions in buckets) ----------------
+# Histograms 
 INFERENCE_SECONDS = Histogram(
     "caption_inference_seconds", "model.generate() time per image", ["mode"],
     buckets=(0.25, 0.5, 1, 1.5, 2, 3, 5, 8, 13, 20, 30),
@@ -69,7 +68,7 @@ BULK_BATCH_IMAGES = Histogram(
     "caption_bulk_batch_images", "Images per bulk ZIP", buckets=(1, 5, 10, 20, 50, 100)
 )
 
-# ---------------- Summaries (_sum and _count) ----------------
+# Summaries (_sum and _count) 
 REQUEST_SECONDS = Summary(
     "caption_request_duration_seconds",
     "End-to-end time per request (whole Single upload or whole ZIP)", ["mode"],
@@ -80,9 +79,9 @@ IMAGE_TOTAL_SECONDS = Summary(
 
 
 def _monitor_process(interval=5):
-    """Background thread: sample this process's memory/CPU every few seconds."""
+    """Background thread  sample this process's memory/CPU every few seconds."""
     proc = psutil.Process(os.getpid())
-    proc.cpu_percent(None)  # first call primes the measurement
+    proc.cpu_percent(None)  
     while True:
         PROCESS_RSS.set(proc.memory_info().rss)
         PROCESS_CPU.set(proc.cpu_percent(None))
@@ -95,7 +94,7 @@ _lock = threading.Lock()
 
 
 def start_metrics_server():
-    """Start /metrics on METRICS_PORT and the monitor thread, only once."""
+
     global _started
     with _lock:
         if _started:
@@ -103,6 +102,6 @@ def start_metrics_server():
         try:
             start_http_server(METRICS_PORT)
         except OSError:
-            pass  # port already bound by this process
+            pass  
         threading.Thread(target=_monitor_process, daemon=True).start()
         _started = True

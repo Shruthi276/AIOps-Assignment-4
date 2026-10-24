@@ -1,5 +1,5 @@
 # app/app.py - Streamlit UI for CPU image captioning, instrumented with Prometheus.
-# AI-assisted (Claude); logic reviewed and understood by me.
+
 import io
 import uuid
 import zipfile
@@ -14,13 +14,12 @@ MAX_IMAGES_PER_ZIP = 100
 MAX_IMAGE_MB = 20
 IMG_EXT = (".jpg", ".jpeg", ".png", ".bmp", ".webp")
 
-st.set_page_config(page_title="CPU Image Captioning", page_icon="🖼️", layout="wide")
+st.set_page_config(page_title="CPU Image Captioning", layout="wide")
 
 
 @st.cache_resource
 def get_metrics():
-    # Streamlit reruns this script on every interaction. Importing inside a
-    # cached function registers metrics and starts /metrics only once.
+
     import app_metrics
     app_metrics.start_metrics_server()
     return app_metrics
@@ -65,7 +64,7 @@ def client_meta():
 
 
 def process_one(data, mode):
-    """Caption one image and record all per-image metrics."""
+    
     m.IMAGE_BYTES.labels(mode).observe(len(data))
     m.BYTES_UPLOADED.labels(mode).inc(len(data))
     try:
@@ -98,7 +97,7 @@ def run_single(data, meta):
 
 
 def select_images(zf):
-    """Pick valid image entries from the ZIP; count everything skipped."""
+    """Pick valid image entries from the ZIP count everything skipped."""
     names = []
     for info in zf.infolist():
         if info.is_dir():
@@ -158,9 +157,9 @@ def run_bulk(data, meta):
     st.session_state.bulk_results = results
 
 
-# ---------------- UI ----------------
+# UI
 meta = client_meta()
-st.title("🖼️ CPU Image Captioning")
+st.title("CPU Image Captioning")
 st.caption(f"Model: `{MODEL_NAME}` on CPU · Metrics: http://localhost:{m.METRICS_PORT}/metrics")
 
 with st.sidebar:

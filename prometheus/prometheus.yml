@@ -1,0 +1,38 @@
+
+global:
+  scrape_interval: 5s       # matches the 5 s Grafana refresh in the demo
+  evaluation_interval: 5s   
+
+rule_files:
+  - alert_rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["localhost:9093"]
+
+scrape_configs:
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Application metrics from the captioning app
+  - job_name: caption_app
+    static_configs:
+      - targets: ["localhost:8000"]
+        labels:
+          app: image-captioning
+          env: local
+
+  # System metrics from node_exporter
+  - job_name: node
+    static_configs:
+      - targets: ["localhost:9100"]
+        labels:
+          host: ubuntu-vm
+
+  # Alertmanager's own health metrics
+  - job_name: alertmanager
+    static_configs:
+      - targets: ["localhost:9093"]

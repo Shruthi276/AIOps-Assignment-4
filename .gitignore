@@ -1,7 +1,10 @@
+# Python
 venv/
 __pycache__/
 *.pyc
-*.zip
 .cache/
-sample_data/*
-!sample_data/.gitkeep
+
+# Local-only helpers and test data (not part of the submission)
+scripts/
+sample_data/
+*.zip

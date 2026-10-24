@@ -1,0 +1,53 @@
+# prometheus/alert_rules.yml - alerting rules for the captioning app and the host.
+
+groups:
+  - name: caption_app_alerts
+    rules:
+     
+      - alert: CaptionAppDown
+        expr: up{job="caption_app"} == 0
+        for: 30s
+        labels: {severity: critical}
+        annotations:
+          summary: "Captioning app is down"
+          description: "Prometheus cannot scrape localhost:8000 for 30s."
+
+      
+      - alert: NodeExporterDown
+        expr: up{job="node"} == 0
+        for: 30s
+        labels: {severity: critical}
+        annotations:
+          summary: "node_exporter is down"
+
+      # AI generated with Prompt: "PromQL p95 latency from histogram  over 1m, alert above 5s"
+      - alert: HighInferenceLatencyP95
+        expr: histogram_quantile(0.95, sum by (le) (rate(caption_inference_seconds_bucket[1m]))) > 5
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: "p95 inference latency above 5s"
+
+      - alert: CaptionErrors
+        expr: sum(increase(caption_errors_total[5m])) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "Caption errors in the last 5 minutes"
+
+  - name: host_alerts
+    rules:
+      # AI generated with Prompt: "PromQL overall CPU utilisation % "
+      - alert: HighCPU
+        expr: 100 * (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[1m]))) > 90
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: "Host CPU above 90% for 2 minutes"
+
+      
+      - alert: LowMemory
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.10
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: "Less than 10% RAM available"

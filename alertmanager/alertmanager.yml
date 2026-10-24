@@ -1,0 +1,12 @@
+# alertmanager/alertmanager.yml - groups alerts by name and routes them.
+# firing alerts are visible in the Alertmanager UI (:9093) and in Grafana.
+
+route:
+  receiver: dashboard-only
+  group_by: [alertname]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+
+receivers:
+  - name: dashboard-only
